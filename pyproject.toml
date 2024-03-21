@@ -57,8 +57,8 @@ lint.fixable = ["ALL"]
 [tool.pytest.ini_options]
 minversion = "7.4"
 addopts = ["-v", "--cov=src"]
-testpaths = ["tests"]
-pythonpath = "src"            # avoid import path append in test files
+testpaths = ["tests", "demos"]
+pythonpath = "src"             # avoid import path append in test files
 
 [tool.pyright]
 reportGeneralTypeIssues = false
