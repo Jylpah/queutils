@@ -45,7 +45,7 @@ packages = ["src/queutils"]
 
 [tool.mypy]
 exclude = ['tmp']
-mypy_path = ['src']
+mypy_path = ['src', 'demos']
 
 [tool.ruff]
 include = ["pyproject.toml", "src/**/*.py", "tests/**/*.py"]
