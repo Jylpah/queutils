@@ -32,7 +32,7 @@ A *Producer* is "process" that adds items to the queue. A producer needs to be r
 from queutils.iterablequeue import IterableQueue
 
 async def producer(
-    Q: IterableQueue[int], N: int, id: int
+    Q: IterableQueue[int], N: int
 ) -> None:
 
     # Add a producer to add items to the queue
@@ -54,14 +54,13 @@ async def producer(
 ```
 from queutils.iterablequeue import IterableQueue
 
-async def consumer(Q: IterableQueue[int], id: int = 1):
+async def consumer(Q: IterableQueue[int]):
     """
     Consume the queue
     """
     async for i in Q:
-        print(f"{since():.2f} consumer {id}: got {i} from queue")
-        await sleep(0.5 * random())
-    print(f"{since():.2f} consumer {id}: queue is done")
+        print(f"consumer: got {i} from the queue")        
+    print(f"consumer: queue is done")
 ```
 
 ####  Complete example 
