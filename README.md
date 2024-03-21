@@ -28,7 +28,7 @@ iterated in `async for` loop. `IterableQueue` terminates automatically when the 
 
 A *Producer* is "process" that adds items to the queue. A producer needs to be registered to the queue with `add_producer()` coroutine. Once a producer has added all the items it intends to, it notifies the queue with `finish()`
 
-```
+```python
 from queutils.iterablequeue import IterableQueue
 
 async def producer(
@@ -51,7 +51,7 @@ async def producer(
 
 *Consumer* is a "process" that takes items from a queue with `get()` coroutine. Since `IterableQueue` is `AsyncIterable`, it can be iterated over `async for`.
 
-```
+```python
 from queutils.iterablequeue import IterableQueue
 
 async def consumer(Q: IterableQueue[int]):
@@ -67,7 +67,7 @@ async def consumer(Q: IterableQueue[int]):
 
 A `IterableQueue` example with multiple producers and consumers. This works with Python 3.11 and higher since the use of `asyncio.TaskGroup`.  
 
-```
+```python
 ## Python 3.11+ required 
 
 from asyncio import sleep, run, TaskGroup
