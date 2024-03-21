@@ -1,6 +1,6 @@
 [project]
 name = "queutils"
-version = "0.1"
+version = "0.8"
 authors = [{ name = "Jylpah", email = "jylpah@gmail.com" }]
 description = "Handy Python Queue utilies"
 readme = "README.md"
@@ -18,9 +18,9 @@ dependencies = ["aioconsole>=0.6"]
 [project.optional-dependencies]
 dev = [
     "build>=0.10",
-    "mypy>=1.7",
+    "mypy>=1.8",
     "pip-chill>=1.0",
-    "pytest>=7.4",
+    "pytest>=8.0",
     "pytest-asyncio>=0.23",
     "pytest-datafiles>=3.0",
     "pytest-cov>=4.1",
@@ -56,9 +56,9 @@ fixable = ["ALL"]
 
 [tool.pytest.ini_options]
 minversion = "7.4"
-addopts = "-v --cov=src"
-pythonpath = "src"       # avoid import path append in test files
-
+addopts = ["-v", "--cov=src"]
+testpaths = ["tests"]
+pythonpath = "src"            # avoid import path append in test files
 
 [tool.pyright]
 reportGeneralTypeIssues = false
