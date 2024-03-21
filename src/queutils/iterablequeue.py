@@ -1,3 +1,12 @@
+# -----------------------------------------------------------
+#  Class IterableQueue(asyncio.Queue[T], AsyncIterable[T], Countable)
+#
+#  IterableQueue is asyncio.Queue subclass that can be iterated asynchronusly. 
+#  IterableQueue terminates automatically when the queue has been
+#  filled and emptied.
+#
+# -----------------------------------------------------------
+
 __author__ = "Jylpah"
 __copyright__ = "Copyright 2024, Jylpah <Jylpah@gmail.com>"
 __credits__ = ["Jylpah"]

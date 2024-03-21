@@ -2,8 +2,8 @@
 #  Class FileQueue(asyncio.Queue)
 #
 #  Class to build asyncio.Queue of filename (pathlib.Path) based on arguments given.
-#  Inherits from queutils.IterableQueue
-#  Supports include/exclude filters
+#  - Inherits from queutils.IterableQueue
+#  - Supports include/exclude filters
 #
 # -----------------------------------------------------------
 
