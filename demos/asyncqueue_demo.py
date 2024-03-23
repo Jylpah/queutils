@@ -24,7 +24,7 @@ async def main() -> None:
         N_process : int = 3
         count : int = 0
         work : List[int] = list(sample(range(3,7), N_process))
-        print(f"work to do {work}")
+        print(f"{N_process} producers will put {', '.join([str(i) for i in  work])} items to the queue")
         with Pool(
             processes=N_process,
             initializer=producer_init,
