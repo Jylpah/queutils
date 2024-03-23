@@ -5,9 +5,7 @@ from .filequeue import FileQueue as FileQueue
 
 __all__ = [
     "asyncqueue",
-    "countarble",
-    "counterqueue",
+    "countable",
     "filequeue",
     "iterablequeue",
-    "urlqueue",
 ]
