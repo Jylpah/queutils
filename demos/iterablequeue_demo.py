@@ -1,6 +1,6 @@
 from asyncio import sleep, run, TaskGroup
 from random import random
-from queutils.iterablequeue import IterableQueue, QueueDone
+from queutils import IterableQueue, QueueDone
 from time import time
 
 start : float = time()
