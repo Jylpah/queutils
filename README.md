@@ -1,16 +1,31 @@
+[![Python package](https://github.com/Jylpah/queutils/actions/workflows/python-package.yml/badge.svg)](https://github.com/Jylpah/queutils/actions/workflows/python-package.yml)  [![codecov](https://codecov.io/gh/Jylpah/queutils/graph/badge.svg?token=rMKdbfHOFs)](https://codecov.io/gh/Jylpah/queutils)
+
 # Queutils
 
-Queutils is a package if handy Python Queue classes:
-- **AsyncQueue** - `async` wrapper for `queue.Queue`
-- **IterableQueue** - `AsyncIterable` queue
+Queutils *[Queue Utils]* is a package if handy Python queue classes:
+- **[AsyncQueue](asyncqueue.md)** - `async` wrapper for `queue.Queue`
+- **[IterableQueue](iterablequeue.md)** - `AsyncIterable` queue
 - **FileQueue** - builds a queue of filenames from input
 
-## IterableQueue
 
-`IterableQueue` is an `asyncio.Queue` subclass that is `AsyncIterable[T]` i.e. it can be 
+# AsyncQueue
+
+[`AsyncQueue`](asyncqueue.md) is a async wrapper for non-async `queue.Queue`. It can be used to create 
+an `asyncio.Queue` compatible out of a (non-async) `multiprocessing.Queue`. This is handy to have `async` code running in `multiprocessing` processes and yet be able to communicate with the parent via (non-async) managed `multiprocessing.Queue` queue. 
+
+## Features 
+
+- `asyncio.Queue` compatible
+- `queue.Queue` support
+- `multiprocessing.Queue` support
+
+
+# IterableQueue
+
+[`IterableQueue`](iterablequeue.md) is an `asyncio.Queue` subclass that is `AsyncIterable[T]` i.e. it can be 
 iterated in `async for` loop. `IterableQueue` terminates automatically when the queue has been filled and emptied. 
     
-### Features
+## Features
 
 - `asyncio.Queue` interface, `_nowait()` methods are experimental
 - `AsyncIterable` support: `async for item in queue:`
@@ -21,107 +36,13 @@ iterated in `async for` loop. `IterableQueue` terminates automatically when the 
 - Countable property can be disabled with count_items=False. This is useful when you
     want to sum the count of multiple IterableQueues 
 
+# FileQueue
 
-### Examples
+`FileQueue` searches files and directories given as input and builds an `IterableQueue[pathlib.Path]` queue of the matching files found. 
 
-#### Producers fill a queue
+## Features
 
-A *Producer* is "process" that adds items to the queue. A producer needs to be registered to the queue with `add_producer()` coroutine. Once a producer has added all the items it intends to, it notifies the queue with `finish()`
-
-```python
-from queutils.iterablequeue import IterableQueue
-
-async def producer(
-    Q: IterableQueue[int], N: int
-) -> None:
-
-    # Add a producer to add items to the queue
-    await Q.add_producer()
-    
-    for i in range(N):
-        await Q.put(i)
-    
-    # notify the queue that this producer does not add more
-    await Q.finish()
-    
-    return None
-```
-
-#### Consumers take items from the queue
-
-*Consumer* is a "process" that takes items from a queue with `get()` coroutine. Since `IterableQueue` is `AsyncIterable`, it can be iterated over `async for`.
-
-```python
-from queutils.iterablequeue import IterableQueue
-
-async def consumer(Q: IterableQueue[int]):
-    """
-    Consume the queue
-    """
-    async for i in Q:
-        print(f"consumer: got {i} from the queue")        
-    print(f"consumer: queue is done")
-```
-
-####  Complete example 
-
-A `IterableQueue` example with multiple producers and consumers. This works with Python 3.11 and higher since the use of `asyncio.TaskGroup`.  
-
-```python
-## Python 3.11+ required 
-
-from asyncio import sleep, run, TaskGroup
-from random import random
-from queutils.iterablequeue import IterableQueue, QueueDone
-from time import time
-
-start : float = time()
-
-def since() -> float:
-    return time() - start
-
-async def producer(
-    Q: IterableQueue[int], N: int, id: int
-) -> None:
-    """
-    Fill the queue with N items
-    """
-    await Q.add_producer()
-    try:
-        for i in range(N):
-            await sleep(0.5 * random())
-            print(f"{since():.2f} producer {id}: awaiting to put {i} to queue")
-            await Q.put(i)
-            print(f"{since():.2f} producer {id}: put {i} to queue")
-        await Q.finish()
-    except QueueDone:
-        print(f"ERROR: producer {id}, this should not happen")
-    return None
-
-async def consumer(Q: IterableQueue[int], id: int = 1):
-    """
-    Consume the queue
-    """
-    async for i in Q:
-        print(f"{since():.2f} consumer {id}: got {i} from queue")
-        await sleep(0.5 * random())
-    print(f"{since():.2f} consumer {id}: queue is done")
-
-async def main() -> None:
-    """
-    Create a queue with maxsize and have multiple producers to fill it and 
-    multiple consumers to consume it over async for loop
-    """
-    queue : IterableQueue[int] = IterableQueue(maxsize=5)
-
-    async with TaskGroup() as tg:
-        for i in range(1,3):
-            tg.create_task(producer(Q=queue, N=5, id=i))
-        await sleep(2)
-        for  i in range(1,4):
-            tg.create_task(consumer(Q=queue, id=i))
-
-if __name__ == "__main__":
-    run(main())
-
-```
+- Input can be given both as `str` and `pathlib.Path`
+- Support both exclusive and inclusive filtering 
+- `case_sensitive: bool = True` param to control case sensitivity (use of `fnmatch` or `fnmatchcase`)
+  
