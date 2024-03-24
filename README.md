@@ -3,14 +3,14 @@
 # Queutils
 
 Queutils *[Queue Utils]* is a package if handy Python queue classes:
-- **[AsyncQueue](asyncqueue.md)** - `async` wrapper for `queue.Queue`
-- **[IterableQueue](iterablequeue.md)** - `AsyncIterable` queue
-- **FileQueue** - builds a queue of filenames from input
+- **[AsyncQueue](docs/asyncqueue.md)** - `async` wrapper for `queue.Queue`
+- **[IterableQueue](docs/iterablequeue.md)** - `AsyncIterable` queue
+- **[FileQueue](docs/filequeue.md)** - builds a queue of filenames from input
 
 
 # AsyncQueue
 
-[`AsyncQueue`](asyncqueue.md) is a async wrapper for non-async `queue.Queue`. It can be used to create 
+[`AsyncQueue`](docs/asyncqueue.md) is a async wrapper for non-async `queue.Queue`. It can be used to create 
 an `asyncio.Queue` compatible out of a (non-async) `multiprocessing.Queue`. This is handy to have `async` code running in `multiprocessing` processes and yet be able to communicate with the parent via (non-async) managed `multiprocessing.Queue` queue. 
 
 ## Features 
@@ -22,7 +22,7 @@ an `asyncio.Queue` compatible out of a (non-async) `multiprocessing.Queue`. This
 
 # IterableQueue
 
-[`IterableQueue`](iterablequeue.md) is an `asyncio.Queue` subclass that is `AsyncIterable[T]` i.e. it can be 
+[`IterableQueue`](docs/iterablequeue.md) is an `asyncio.Queue` subclass that is `AsyncIterable[T]` i.e. it can be 
 iterated in `async for` loop. `IterableQueue` terminates automatically when the queue has been filled and emptied. 
     
 ## Features
@@ -38,11 +38,12 @@ iterated in `async for` loop. `IterableQueue` terminates automatically when the 
 
 # FileQueue
 
-`FileQueue` searches files and directories given as input and builds an `IterableQueue[pathlib.Path]` queue of the matching files found. 
+[`FileQueue`](docs/filequeue.md) builds a queue (`IterableQueue[pathlib.Path]`) of the matching files found based on search parameters given. It can search both list of files or directories or mixed. Async method `FileQueue.mk_queue()` searches subdirectories of given directories.  
 
 ## Features
 
 - Input can be given both as `str` and `pathlib.Path`
-- Support both exclusive and inclusive filtering 
-- `case_sensitive: bool = True` param to control case sensitivity (use of `fnmatch` or `fnmatchcase`)
-  
+- `exclude: bool` exclusive or  inclusive filtering. Default is `False`.
+- `case_sensitive: bool` case sensitive filtering (use of `fnmatch` or `fnmatchcase`). Default is `True`.
+- `follow_symlinks: bool` whether to follow symlinks. Default is `False`.
+

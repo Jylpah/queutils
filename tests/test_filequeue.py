@@ -87,11 +87,15 @@ def count_matches(
 async def test_1_filter(tmp_path: Path, file_tree: list[Path]) -> None:
     mk_files(tmp_path, files=file_tree)
 
-    for filter, exclude, case_sensitive in zip(
-        ["*.json", "*.wotbreplay"], [True, False], [True, False]
+    for filter, exclude, case_sensitive, follow_symlinks in zip(
+        ["*.json", "*.wotbreplay"], [True, False], [True, False], [True, False]
     ):
         fq = FileQueue(
-            base=tmp_path, filter=filter, exclude=exclude, case_sensitive=case_sensitive
+            base=tmp_path,
+            filter=filter,
+            exclude=exclude,
+            case_sensitive=case_sensitive,
+            follow_symlinks=follow_symlinks,
         )
         await fq.mk_queue([str(tmp_path)])
         matches: int = count_matches(
