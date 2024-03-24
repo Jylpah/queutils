@@ -49,7 +49,7 @@ exclude = ['tmp']
 mypy_path = ['src', 'demos']
 
 [tool.ruff]
-include = ["pyproject.toml", "src/**/*.py", "tests/**/*.py"]
+include = ["pyproject.toml", "src/**/*.py", "tests/**/*.py", "demos/**/*.py"]
 indent-width = 4
 extend-include = ["*.ipynb"]
 extend-exclude = [".venv", ".vscode"]
