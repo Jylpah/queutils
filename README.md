@@ -3,9 +3,10 @@
 # Queutils
 
 Queutils *[Queue Utils]* is a package if handy Python queue classes:
-- **[AsyncQueue](docs/asyncqueue.md)** - `async` wrapper for `queue.Queue`
-- **[IterableQueue](docs/iterablequeue.md)** - `AsyncIterable` queue
-- **[FileQueue](docs/filequeue.md)** - builds a queue of filenames from input
+
+- **[AsyncQueue](docs/asyncqueue.md)** - An `async` wrapper for non-async `queue.Queue`
+- **[IterableQueue](docs/iterablequeue.md)** - An `AsyncIterable` queue that terminates when finished
+- **[FileQueue](docs/filequeue.md)** - Builds an iterable queue of filenames from files/dirs given as input
 
 
 # AsyncQueue
