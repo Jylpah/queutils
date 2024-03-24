@@ -1,11 +1,11 @@
 # IterableQueue
 
 `IterableQueue` is an `asyncio.Queue` subclass that is `AsyncIterable[T]` i.e. it can be 
-iterated in `async for` loop. `IterableQueue` terminates automatically when the queue has been filled and emptied. 
+iterated in `async for` loop. The great benefit of `IterableQueue` is that it terminates automatically when the queue has been filled and emptied. This simplifies more complex queue-based processing flows.
     
 ## Features
 
-- `asyncio.Queue` interface, `_nowait()` methods are experimental
+- `asyncio.Queue` interface
 - `AsyncIterable` support: `async for item in queue:`
 - Automatic termination of the consumers with `QueueDone` exception when the queue has been emptied 
 - Producers must be registered with `add_producer()` and they must notify the queue
@@ -13,6 +13,10 @@ iterated in `async for` loop. `IterableQueue` terminates automatically when the 
 - Countable interface to count number of items task_done() through `count` property
 - Countable property can be disabled with count_items=False. This is useful when you
     want to sum the count of multiple IterableQueues 
+
+### Experimental
+
+- `Asyncio.Queue` `_nowait()` methods are experimental, but "seem to work" in test pipeline
 
 
 ## Examples
