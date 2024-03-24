@@ -1,6 +1,6 @@
 # FileQueue
 
-[`FileQueue`](docs/filequeue.md) builds a queue (`IterableQueue[pathlib.Path]`) of the matching files found based on search parameters given. It can search both list of files or directories or mixed. Async method `FileQueue.mk_queue()` searches subdirectories of given directories.  
+`FileQueue` builds a queue (`IterableQueue[pathlib.Path]`) of the matching files found based on search parameters given. It can search both list of files or directories or mixed. Async method `FileQueue.mk_queue()` searches subdirectories of given directories.  
 
 ## Features
 
@@ -8,7 +8,6 @@
 - `exclude: bool` exclusive or  inclusive filtering. Default is `False`.
 - `case_sensitive: bool` case sensitive filtering (use of `fnmatch` or `fnmatchcase`). Default is `True`.
 - `follow_symlinks: bool` whether to follow symlinks. Default is `False`.
-
 
 # Example
 

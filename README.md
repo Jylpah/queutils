@@ -38,11 +38,12 @@ iterated in `async for` loop. `IterableQueue` terminates automatically when the 
 
 # FileQueue
 
-[`FileQueue`](docs/filequeue.md) searches files and directories given as input and builds an `IterableQueue[pathlib.Path]` queue of the matching files found. 
+[`FileQueue`](docs/filequeue.md) builds a queue (`IterableQueue[pathlib.Path]`) of the matching files found based on search parameters given. It can search both list of files or directories or mixed. Async method `FileQueue.mk_queue()` searches subdirectories of given directories.  
 
 ## Features
 
 - Input can be given both as `str` and `pathlib.Path`
-- Support both exclusive and inclusive filtering 
-- `case_sensitive: bool = True` param to control case sensitivity (use of `fnmatch` or `fnmatchcase`)
-  
+- `exclude: bool` exclusive or  inclusive filtering. Default is `False`.
+- `case_sensitive: bool` case sensitive filtering (use of `fnmatch` or `fnmatchcase`). Default is `True`.
+- `follow_symlinks: bool` whether to follow symlinks. Default is `False`.
+
