@@ -58,19 +58,21 @@ class FileQueue(IterableQueue[Path]):
         filter: str = "*",
         exclude: bool = False,
         case_sensitive: bool = True,
+        follow_symlinks: bool = False, 
         **kwargs,
     ):
-        # assert maxsize >= 0, "maxsize has to be >= 0"
-        assert isinstance(case_sensitive, bool), "case_sensitive has to be bool"
-        assert isinstance(filter, str), "filter has to be string"
         assert base is None or isinstance(base, Path), "base has to be Path or None"
-
+        assert isinstance(filter, str), "filter has to be string"
+        assert isinstance(case_sensitive, bool), "case_sensitive has to be bool"
+        assert isinstance(follow_symlinks, bool), "follow_symlinks has to be bool"
+        
         # debug(f"maxsize={str(maxsize)}, filter='{filter}'")
         super().__init__(count_items=True, **kwargs)
         self._base: Optional[Path] = base
         # self._done: bool = False
         self._case_sensitive: bool = False
         self._exclude: bool = False
+        self._follow_symlinks : bool = follow_symlinks
         self.set_filter(filter=filter, exclude=exclude, case_sensitive=case_sensitive)
 
     def set_filter(
@@ -119,17 +121,19 @@ class FileQueue(IterableQueue[Path]):
             error(f"{err}")
         return await self.finish()
 
+
     async def put(self, path: Path) -> None:
         """Recursive function to build process queue. Sanitize filename"""
         assert isinstance(path, Path), "path has to be type Path()"
         try:
+            if path.is_symlink() and not self._follow_symlinks:
+                return None
             if path.is_dir():
                 for child in path.iterdir():
                     await self.put(child)
             elif path.is_file() and self.match(path):
                 debug("Adding file to queue: %s", str(path))
                 await super().put(path)
-                # self._count += 1
         except Exception as err:
             error(f"{err}")
         return None
