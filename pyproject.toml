@@ -1,6 +1,6 @@
 [project]
 name = "queutils"
-version = "0.8.3"
+version = "0.8.4"
 authors = [{ name = "Jylpah", email = "jylpah@gmail.com" }]
 description = "Handy Python Queue utilies"
 readme = "README.md"
