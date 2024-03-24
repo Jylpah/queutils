@@ -2,7 +2,7 @@
 
 # Queutils
 
-Queutils *[Queue Utils]* is a package if handy Python queue classes:
+Queutils *[Queue Utils]* is a package of handy Python queue classes:
 
 - **[AsyncQueue](docs/asyncqueue.md)** - An `async` wrapper for non-async `queue.Queue`
 - **[IterableQueue](docs/iterablequeue.md)** - An `AsyncIterable` queue that terminates when finished
