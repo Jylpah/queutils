@@ -5,8 +5,9 @@
 ## Features
 
 - Input can be given both as `str` and `pathlib.Path`
-- Support both exclusive and inclusive filtering 
-- `case_sensitive: bool = True` param to control case sensitivity (use of `fnmatch` or `fnmatchcase`)
+- `exclude: bool` exclusive or  inclusive filtering. Default is `False`.
+- `case_sensitive: bool` case sensitive filtering (use of `fnmatch` or `fnmatchcase`). Default is `True`.
+- `follow_symlinks: bool` whether to follow symlinks. Default is `False`.
 
 
 # Example
