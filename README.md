@@ -26,10 +26,10 @@ an `asyncio.Queue` compatible interface to a (non-async) managed `multiprocessin
 [`IterableQueue`](docs/iterablequeue.md) is an `asyncio.Queue` subclass that is `AsyncIterable[T]` i.e. it can be 
 iterated in `async for` loop. `IterableQueue` terminates automatically when the queue has been filled and emptied. 
 
-The `IterableQueue` requires "producers" (functions addinng items to the queue) to register themselves and it 
-keeps count of registers who are "finished" adding items to the queue. Once all the registered producers are 
-"finished", the queue enters into "filled" state and no new items can be added anymore. Once an 
-"filled" queue is emptied, the queue becomes "done" and all new attempts to `get()` and item will 
+The `IterableQueue` requires "producers" (functions adding items to the queue) to register themselves and it 
+keeps count of registered producers which are "finished" adding items to the queue. Once all the registered 
+producers are "finished", the queue enters into "filled" state and no new items can be added. Once an 
+"filled" queue is emptied, the queue becomes "done" and all new `get()` calls to the queue will 
 `raise QueueDone` exception. 
     
 ## Features
