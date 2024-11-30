@@ -1,7 +1,7 @@
 # -----------------------------------------------------------
 #  Class IterableQueue(asyncio.Queue[T], AsyncIterable[T], Countable)
 #
-#  IterableQueue is asyncio.Queue subclass that can be iterated asynchronusly. 
+#  IterableQueue is asyncio.Queue subclass that can be iterated asynchronusly.
 #  IterableQueue terminates automatically when the queue has been
 #  filled and emptied.
 #
@@ -23,7 +23,7 @@ from .countable import Countable
 import logging
 
 # Setup logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 error = logger.error
 message = logger.warning
 verbose = logger.info
@@ -31,24 +31,26 @@ debug = logger.debug
 
 T = TypeVar("T")
 
+
 class QueueDone(Exception):
     """
     Exception to mark an IterableQueue as filled and emptied i.e. done
     """
+
     pass
 
 
 class IterableQueue(Queue[T], AsyncIterable[T], Countable):
     """
-    IterableQueue is asyncio.Queue subclass that can be iterated asynchronusly. 
-    
+    IterableQueue is asyncio.Queue subclass that can be iterated asynchronusly.
+
     IterableQueue terminates automatically when the queue has been
     filled and emptied. Supports:
     - asyncio.Queue() interface, _nowait() methods are experimental
     - AsyncIterable(): async for item in queue:
     - Automatic termination of the consumers when the queue has been emptied with QueueDone exception
     - Producers must be registered with add_producer() and they must notify the queue
-      with finish() once they have finished adding items 
+      with finish() once they have finished adding items
     - Countable interface to count number of items task_done() through 'count' property
     - Countable property can be disabled with count_items=False. This is useful when you
     want to sum the count of multiple IterableQueues
@@ -74,23 +76,22 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
 
     @property
     def is_filled(self) -> bool:
-        """"
-        True if all the producers finished filling the queue. 
+        """ "
+        True if all the producers finished filling the queue.
         New items cannot be added to a filled queue nor can new producers can be added.
         """
         return self._filled.is_set()
-    
+
     @property
     def is_done(self) -> bool:
         """
-        Has the queue been filled, emptied and all the items have been marked with task_done() 
+        Has the queue been filled, emptied and all the items have been marked with task_done()
         """
         return self.is_filled and self.empty() and not self.has_wip
 
     @property
     def maxsize(self) -> int:
         return self._Q.maxsize
-
 
     def full(self) -> bool:
         """
@@ -122,8 +123,8 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
     @property
     def wip(self) -> int:
         """
-        Number of items in progress i.e. items that have been 
-        read from the queue, but not marked with task_done() 
+        Number of items in progress i.e. items that have been
+        read from the queue, but not marked with task_done()
         """
         return self._wip
 
@@ -236,7 +237,7 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
     def get_nowait(self) -> T:
         """
         Experimental asyncio.Queue.get_nowait() implementation
-        """        
+        """
         item: T | None = self._Q.get_nowait()
         if item is None:
             self._empty.set()

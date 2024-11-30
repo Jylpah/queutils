@@ -1,7 +1,7 @@
 # -----------------------------------------------------------
 #  Class AsyncQueue(asyncio.Queue, Generic[T])
 #
-#  asyncio wrapper for non-async queue.Queue. Can be used to create 
+#  asyncio wrapper for non-async queue.Queue. Can be used to create
 #  an asyncio.Queue out of a (non-async) multiprocessing.Queue.
 #
 # -----------------------------------------------------------
@@ -10,7 +10,6 @@ __author__ = "Jylpah"
 __copyright__ = "Copyright 2024, Jylpah <Jylpah@gmail.com>"
 __credits__ = ["Jylpah"]
 __license__ = "MIT"
-# __version__ = "1.0"
 __maintainer__ = "Jylpah"
 __email__ = "Jylpah@gmail.com"
 __status__ = "Production"
@@ -35,17 +34,16 @@ error = logger.error
 
 class AsyncQueue(asyncio.Queue, Generic[T]):
     """
-    Async wrapper for non-async queue.Queue. Can be used to create 
+    Async wrapper for non-async queue.Queue. Can be used to create
     an asyncio.Queue out of a (non-async) multiprocessing.Queue.
     """
 
-    def __init__(self, queue: Queue[T], asleep: float = 0.01):
+    def __init__(self, queue: Queue[T], asleep: float = 0.001):
         self._Q: Queue[T] = queue
         # self._maxsize: int = queue.maxsize
         self._done: int = 0
         self._items: int = 0
         self._sleep: float = asleep
-
 
     @property
     def maxsize(self) -> int:
