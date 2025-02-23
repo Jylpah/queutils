@@ -59,7 +59,8 @@ lint.fixable = ["ALL"]
 minversion = "7.4"
 addopts = ["-v", "--cov=src"]
 testpaths = ["tests", "demos"]
-pythonpath = "src"             # avoid import path append in test files
+pythonpath = "src"                              # avoid import path append in test files
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.pyright]
 reportGeneralTypeIssues = false
