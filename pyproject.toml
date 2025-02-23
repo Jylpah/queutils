@@ -63,3 +63,5 @@ pythonpath = "src"             # avoid import path append in test files
 
 [tool.pyright]
 reportGeneralTypeIssues = false
+reportInvalidStringEscapeSequence = false
+typeCheckingMode = "off"
