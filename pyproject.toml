@@ -1,6 +1,6 @@
 [project]
 name = "queutils"
-version = "0.8.5"
+version = "0.9.1"
 authors = [{ name = "Jylpah", email = "jylpah@gmail.com" }]
 description = "Handy Python Queue utilies"
 readme = "README.md"
@@ -13,7 +13,7 @@ classifiers = [
     "Framework :: AsyncIO",
     "Topic :: Software Development :: Libraries",
 ]
-dependencies = ["aioconsole>=0.6"]
+dependencies = ["aioconsole>=0.6", "Deprecated>=1.2.18"]
 
 [project.optional-dependencies]
 dev = [
@@ -27,6 +27,7 @@ dev = [
     "pytest-cov>=4.1",
     "pytest-timeout>=2.2",
     "ruff>=0.1.9",
+    "types-Deprecated>=1.2.15",
 ]
 
 
@@ -59,7 +60,10 @@ lint.fixable = ["ALL"]
 minversion = "7.4"
 addopts = ["-v", "--cov=src"]
 testpaths = ["tests", "demos"]
-pythonpath = "src"             # avoid import path append in test files
+pythonpath = "src"                              # avoid import path append in test files
+asyncio_default_fixture_loop_scope = "function"
 
 [tool.pyright]
 reportGeneralTypeIssues = false
+reportInvalidStringEscapeSequence = false
+typeCheckingMode = "off"
