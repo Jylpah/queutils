@@ -13,7 +13,7 @@ from random import random, choice, randint
 import string
 from collections import defaultdict
 
-from queutils import IterableQueue, CounterQueue, CategoryCounterQueue, QueueDone
+from queutils import IterableQueue, CategoryCounterQueue, QueueDone
 
 
 def randomword(length: int) -> str:

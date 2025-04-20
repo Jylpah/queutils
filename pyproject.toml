@@ -13,7 +13,7 @@ classifiers = [
     "Framework :: AsyncIO",
     "Topic :: Software Development :: Libraries",
 ]
-dependencies = ["aioconsole>=0.6"]
+dependencies = ["aioconsole>=0.6", "Deprecated>=1.2.18"]
 
 [project.optional-dependencies]
 dev = [
@@ -27,6 +27,7 @@ dev = [
     "pytest-cov>=4.1",
     "pytest-timeout>=2.2",
     "ruff>=0.1.9",
+    "types-Deprecated>=1.2.15",
 ]
 
 

@@ -1,5 +1,6 @@
 from asyncio import Queue
 from typing import TypeVar
+from deprecated import deprecated
 from .countable import Countable
 from .iterablequeue import IterableQueue, QueueDone
 from collections import defaultdict
@@ -19,6 +20,7 @@ debug = logger.debug
 T = TypeVar("T")
 
 
+@deprecated(version="0.9.1", reason="Use CategoryCounterQueue instead")
 class CounterQueue(Queue[T], Countable):
     """
     CounterQueue is a asyncio.Queue for counting items
