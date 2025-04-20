@@ -55,7 +55,7 @@ class CounterQueue(Queue[T], Countable):
 
 class CategoryCounterQueue(IterableQueue[tuple[str, int]]):
     """
-    CategorySummerQueue is a asyncio.Queue for summing values by category
+    CategorySummerQueue is a asyncio.Queue for summing up values by category
     """
 
     _counter: defaultdict[str, int]
@@ -75,27 +75,27 @@ class CategoryCounterQueue(IterableQueue[tuple[str, int]]):
         super().task_done()
         return (category, value)
 
-    async def send(self, category: str, value: int) -> None:
+    async def send(self, category: str = "count", value: int = 1) -> None:
         """Send count of a category"""
-        self._counter[category] += value
+        await super().put((category, value))
         return None
 
-    def category_count(self, category: str) -> int:
+    def get_count(self, category: str = "count") -> int:
         """Return count of a category"""
         return self._counter[category]
 
-    def category_counts(self) -> dict[str, int]:
+    def get_counts(self) -> defaultdict[str, int]:
         """Return counts of all categories"""
         return self._counter
 
-    async def listen(self) -> None:
+    async def listen(self) -> defaultdict[str, int]:
         """Listen for category values"""
         try:
             while True:
                 await self.receive()
         except QueueDone:
             pass
-        return None
+        return self.get_counts()
 
 
 class QCounter:
