@@ -6,6 +6,7 @@ Queutils *[Queue Utils]* is a package of handy Python queue classes:
 
 - **[AsyncQueue](docs/asyncqueue.md)** - An `async` wrapper for non-async `queue.Queue`
 - **[IterableQueue](docs/iterablequeue.md)** - An `AsyncIterable` queue that terminates when finished
+- **EventCounterQueue** - An `IterableQueue` for counting events in `async` threads
 - **[FileQueue](docs/filequeue.md)** - Builds an iterable queue of filenames from files/dirs given as input
 
 
@@ -42,6 +43,16 @@ producers are "finished", the queue enters into "filled" state and no new items 
 - Countable interface to count number of items task_done() through `count` property
 - Countable property can be disabled with count_items=False. This is useful when you
     want to sum the count of multiple IterableQueues 
+
+# EventCounterQueue
+
+`EventCounterQueue` can be used to count named events (default event is `count`) between `async` threads. `async` worker threads call `queue.send(category="event_name", N=amount)`. The receving end can either `receive()` a single event or `listen()` all  events and return `collections.defaultdict[str, int]` as a result.
+
+## Features
+
+- Supports multiple producers and a single listener
+- Default event is `count`
+
 
 # FileQueue
 

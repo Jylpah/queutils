@@ -20,7 +20,7 @@ debug = logger.debug
 T = TypeVar("T")
 
 
-@deprecated(version="0.9.1", reason="Use CategoryCounterQueue instead")
+@deprecated(version="0.9.1", reason="Use EventCounterQueue instead")
 class CounterQueue(Queue[T], Countable):
     """
     CounterQueue is a asyncio.Queue for counting items
@@ -55,9 +55,9 @@ class CounterQueue(Queue[T], Countable):
         return self._count_items
 
 
-class CategoryCounterQueue(IterableQueue[tuple[str, int]]):
+class EventCounterQueue(IterableQueue[tuple[str, int]]):
     """
-    CategorySummerQueue is a asyncio.Queue for summing up values by category
+    EventCounterQueue is a asyncio.Queue for summing up values by category
     """
 
     _counter: defaultdict[str, int]
