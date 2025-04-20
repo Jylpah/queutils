@@ -57,7 +57,7 @@ class CounterQueue(Queue[T], Countable):
 
 class EventCounterQueue(IterableQueue[tuple[str, int]]):
     """
-    EventCounterQueue is a asyncio.Queue for summing up values by category
+    EventCounterQueue is a asyncio.Queue for counting events by name
     """
 
     _counter: defaultdict[str, int]
@@ -69,29 +69,29 @@ class EventCounterQueue(IterableQueue[tuple[str, int]]):
         self._counter = defaultdict(int)
 
     async def receive(self) -> tuple[str, int]:
-        """Receive a category value from the queue and sum it"""
-        category: str
+        """Receive an event value from the queue and sum it"""
+        event: str
         value: int
-        category, value = await super().get()
-        self._counter[category] += value
+        event, value = await super().get()
+        self._counter[event] += value
         super().task_done()
-        return (category, value)
+        return (event, value)
 
-    async def send(self, category: str = "count", value: int = 1) -> None:
-        """Send count of a category"""
-        await super().put((category, value))
+    async def send(self, event: str = "count", value: int = 1) -> None:
+        """Send count of an event"""
+        await super().put((event, value))
         return None
 
-    def get_count(self, category: str = "count") -> int:
-        """Return count of a category"""
-        return self._counter[category]
+    def get_count(self, event: str = "count") -> int:
+        """Return count for an event"""
+        return self._counter[event]
 
     def get_counts(self) -> defaultdict[str, int]:
-        """Return counts of all categories"""
+        """Return counts of all events"""
         return self._counter
 
     async def listen(self) -> defaultdict[str, int]:
-        """Listen for category values"""
+        """Listen for event values"""
         try:
             while True:
                 await self.receive()
