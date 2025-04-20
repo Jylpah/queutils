@@ -46,7 +46,7 @@ producers are "finished", the queue enters into "filled" state and no new items 
 
 # EventCounterQueue
 
-`EventCounterQueue` can be used to count named events (default event is `count`) between `async` threads. `async` worker threads call `queue.send(category="event_name", N=amount)`. The receving end can either `receive()` a single event or `listen()` all  events and return `collections.defaultdict[str, int]` as a result.
+`EventCounterQueue` can be used to count named events (default event is `count`) between `async` threads. `async` worker threads call `queue.send(event="event_name", N=amount)`. The receving end can either `receive()` a single event or `listen()` all  events and return `collections.defaultdict[str, int]` as a result.
 
 ## Features
 
