@@ -4,15 +4,15 @@
 
 Queutils *[Queue Utils]* is a package of handy Python queue classes:
 
-- **[AsyncQueue](docs/asyncqueue.md)** - An `async` wrapper for non-async `queue.Queue`
-- **[IterableQueue](docs/iterablequeue.md)** - An `AsyncIterable` queue that terminates when finished
+- **AsyncQueue** - An `async` wrapper for non-async `queue.Queue`
+- **IterableQueue** - An `AsyncIterable` queue that terminates when finished
 - **EventCounterQueue** - An `IterableQueue` for counting events in `async` threads
-- **[FileQueue](docs/filequeue.md)** - Builds an iterable queue of filenames from files/dirs given as input
+- **FileQueue** - Builds an iterable queue of filenames from files/dirs given as input
 
 
 # AsyncQueue
 
-[`AsyncQueue`](docs/asyncqueue.md) is a async wrapper for non-async `queue.Queue`. It can be used to create 
+`AsyncQueue` is a async wrapper for non-async `queue.Queue`. It can be used to create 
 an `asyncio.Queue` compatible interface to a (non-async) managed `multiprocessing.Queue` and thus enable `async` code in parent/child processes to communicate over  `multiprocessing.Queue` as it were an `asyncio.Queue`. 
 
 ## Features 
@@ -24,7 +24,7 @@ an `asyncio.Queue` compatible interface to a (non-async) managed `multiprocessin
 
 # IterableQueue
 
-[`IterableQueue`](docs/iterablequeue.md) is an `asyncio.Queue` subclass that is `AsyncIterable[T]` i.e. it can be 
+`IterableQueue` is an `asyncio.Queue` subclass that is `AsyncIterable[T]` i.e. it can be 
 iterated in `async for` loop. `IterableQueue` terminates automatically when the queue has been filled and emptied. 
 
 The `IterableQueue` requires "producers" (functions adding items to the queue) to register themselves and it 
@@ -56,7 +56,7 @@ producers are "finished", the queue enters into "filled" state and no new items 
 
 # FileQueue
 
-[`FileQueue`](docs/filequeue.md) builds a queue (`IterableQueue[pathlib.Path]`) of the matching 
+`FileQueue` builds a queue (`IterableQueue[pathlib.Path]`) of the matching 
 files found based on search parameters given. It can search both list of files or directories or 
 mixed. Async method `FileQueue.mk_queue()` searches subdirectories of given directories.  
 

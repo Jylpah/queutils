@@ -1,9 +1,9 @@
 [project]
 name = "queutils"
-version = "0.9.1"
+version = "0.9.2"
 authors = [{ name = "Jylpah", email = "jylpah@gmail.com" }]
 description = "Handy Python Queue utilies"
-readme = "README.md"
+readme = { file = "pypi.md", content-type = "text/markdown" }
 requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",

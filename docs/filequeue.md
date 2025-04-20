@@ -36,3 +36,17 @@ async def main() -> None:
 if __name__ == "__main__":
     run(main())
 ```
+
+### Run
+
+```bash
+cd demos
+python -m filequeue_demo
+```
+Output
+```text
+found asyncqueue_demo.py
+found iterablequeue_demo.py
+found filequeue_demo.py
+finished, no need to use fileQ.join()
+```
