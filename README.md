@@ -13,7 +13,7 @@ Queutils *[Queue Utils]* is a package of handy Python queue classes:
 # AsyncQueue
 
 [`AsyncQueue`](docs/asyncqueue.md) is a async wrapper for non-async `queue.Queue`. It can be used to create 
-an `asyncio.Queue` compatible interface to a (non-async) managed `multiprocessing.Queue` and thus enable `async` code in parent/child processes to communicate over  `multiprocessing.Queue` as it were an `asyncio.Queue`. 
+an `asyncio.Queue` compatible interface to a (non-async) managed `multiprocessing.Queue` and thus enable `async` code in parent/child processes to communicate over  `multiprocessing.Queue` as it were an `asyncio.Queue`. Uses `sleep()` for `get()`/`put()` if the queue is empty/full.
 
 ## Features 
 
@@ -27,7 +27,7 @@ an `asyncio.Queue` compatible interface to a (non-async) managed `multiprocessin
 [`IterableQueue`](docs/iterablequeue.md) is an `asyncio.Queue` subclass that is `AsyncIterable[T]` i.e. it can be 
 iterated in `async for` loop. `IterableQueue` terminates automatically when the queue has been filled and emptied. 
 
-The `IterableQueue` requires "producers" (functions adding items to the queue) to register themselves and it 
+The `IterableQueue` requires "producers" (functions adding items to the queue) to register themselves with `add_producer()` call and it 
 keeps count of registered producers which are "finished" adding items to the queue. Once all the registered 
 producers are "finished", the queue enters into "filled" state and no new items can be added. Once an 
 "filled" queue is emptied, the queue becomes "done" and all new `get()` calls to the queue will 
