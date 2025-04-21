@@ -7,7 +7,7 @@ Queutils *[Queue Utils]* is a package of handy Python queue classes:
 - **[AsyncQueue](docs/asyncqueue.md)** - An `async` wrapper for non-async `queue.Queue`
 - **[IterableQueue](docs/iterablequeue.md)** - An `AsyncIterable` queue that terminates when finished
 - **EventCounterQueue** - An `IterableQueue` for counting events in `async` threads
-- **[FileQueue](docs/filequeue.md)** - Builds an iterable queue of filenames from files/dirs given as input
+- **[FileQueue](docs/filequeue.md)** - Builds an `IterableQueue[pathlib.Path]` of filenames from files/dirs given as input
 
 
 # AsyncQueue
