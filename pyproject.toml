@@ -69,3 +69,6 @@ reportInvalidStringEscapeSequence = false
 typeCheckingMode = "off"
 include = ["src", "tests"]
 extraPaths = ["src"]
+
+[tool.coverage.run]
+omit = ['tests/*']
