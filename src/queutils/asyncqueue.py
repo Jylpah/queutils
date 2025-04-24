@@ -19,17 +19,9 @@ from queue import Full, Empty, Queue
 from asyncio.queues import QueueEmpty, QueueFull
 import asyncio
 from typing import Generic, TypeVar
-import logging
 from asyncio import sleep
 
 T = TypeVar("T")
-
-logger = logging.getLogger(__name__)
-
-debug = logger.debug
-message = logger.warning
-verbose = logger.info
-error = logger.error
 
 
 class AsyncQueue(asyncio.Queue, Generic[T]):

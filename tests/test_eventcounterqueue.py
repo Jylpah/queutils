@@ -54,7 +54,7 @@ async def test_1_category_counter_queue(
             count: int = randint(1, 10)
             await Q.send(cat, count)
             _counter[cat] += count
-        await Q.finish()
+        await Q.finish_producer()
         return _counter
 
     senders: list[Task] = list()
