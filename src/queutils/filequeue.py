@@ -67,9 +67,8 @@ class FileQueue(IterableQueue[Path]):
         assert isinstance(follow_symlinks, bool), "follow_symlinks has to be bool"
 
         # debug(f"maxsize={str(maxsize)}, filter='{filter}'")
-        super().__init__(count_items=True, **kwargs)
+        super().__init__(**kwargs)
         self._base: Optional[Path] = base
-        # self._done: bool = False
         self._case_sensitive: bool = False
         self._exclude: bool = False
         self._follow_symlinks: bool = follow_symlinks
