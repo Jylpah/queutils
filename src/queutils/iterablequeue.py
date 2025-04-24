@@ -68,8 +68,11 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
         self._modify: Lock = Lock()
         self._put_lock: Lock = Lock()
 
+        # the last producer has finished
         self._filled: Event = Event()
+        # the last producer has finished and the queue is empty
         self._empty: Event = Event()
+        # the queue is done, all items have been marked with task_done()
         self._done: Event = Event()
 
         self._empty.set()
@@ -98,12 +101,6 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
         True if the queue is full
         """
         return self._Q.full()
-
-    def check_done(self) -> bool:
-        if self.is_filled and self.empty() and not self.has_wip:
-            self._done.set()
-            return True
-        return False
 
     def empty(self) -> bool:
         """
@@ -221,8 +218,6 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
                 await self._Q.put(None)
                 raise QueueDone
         else:
-            if self._Q.qsize() == 0:
-                self._empty.set()
             async with self._modify:
                 self._wip += 1
             return item
@@ -242,8 +237,6 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
                 pass
             raise QueueDone
         else:
-            if self._Q.qsize() == 0:
-                self._empty.set()
             self._wip += 1
             return item
 
@@ -254,6 +247,15 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
         if self._wip < 0:
             raise ValueError("task_done() called more than tasks open")
         self.check_done()
+
+    def check_done(self) -> bool:
+        """
+        Check if the queue can be set 'done'
+        """
+        if self.is_filled and self._empty.is_set() and not self.has_wip:
+            self._done.set()
+            return True
+        return False
 
     async def join(self) -> None:
         debug("Waiting queue to be filled")
