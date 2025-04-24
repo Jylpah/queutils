@@ -13,9 +13,10 @@ from random import random
 
 from queutils import IterableQueue, QueueDone
 
-QSIZE: int = 10
-N: int = 100  # N >> QSIZE
-THREADS: int = 4
+QSIZE: int = 37
+N: int = 500  # N >> QSIZE
+THREADS: int = 17
+TIMEOUT: int = 30
 # N : int = int(1e10)
 
 
@@ -54,17 +55,19 @@ async def _consumer_int(Q: IterableQueue[int], n: int = -1, wait: float = 0) -> 
     return True
 
 
-@pytest.mark.timeout(10)
+@pytest.mark.timeout(TIMEOUT)
 @pytest.mark.asyncio
 async def test_1_put_get_async(test_interablequeue_int: IterableQueue[int]):
     """Test: put(), get(), join(), qsize(), empty() == True"""
     Q = test_interablequeue_int
     try:
-        async with timeout(5):
+        async with timeout(TIMEOUT / 2):
             await _producer_int(Q, QSIZE - 1, finish=True)
     except TimeoutError:
         assert False, "IterableQueue got stuck"
-    assert Q.qsize() == QSIZE - 1, f"qsize() returned {Q.qsize()}, should be {QSIZE-1}"
+    assert Q.qsize() == QSIZE - 1, (
+        f"qsize() returned {Q.qsize()}, should be {QSIZE - 1}"
+    )
     try:
         await Q.put(1)
         assert False, "Queue is filled and put() should raise an exception"
@@ -73,7 +76,7 @@ async def test_1_put_get_async(test_interablequeue_int: IterableQueue[int]):
     assert not Q.is_done, "is_done returned True even queue is not finished"
     consumer: Task = create_task(_consumer_int(Q))
     try:
-        async with timeout(5):
+        async with timeout(TIMEOUT / 2):
             await Q.join()
         await Q.get()
         assert False, "Queue is done and put() should raise an exception"
@@ -133,16 +136,16 @@ async def test_2_put_get_nowait(test_interablequeue_int: IterableQueue[int]):
     assert finisher.done(), "finisher has not finished"
 
 
-@pytest.mark.timeout(10)
+@pytest.mark.timeout(TIMEOUT)
 @pytest.mark.asyncio
 async def test_3_multiple_producers(test_interablequeue_int: IterableQueue[int]):
     Q = test_interablequeue_int
     workers: list[Task] = list()
     for _ in range(THREADS):
-        workers.append(create_task(_producer_int(Q, N, finish=True, wait=0.05)))
+        workers.append(create_task(_producer_int(Q, N, finish=True, wait=0.01)))
     try:
         assert not Q.is_done, "is_done returned True even queue is not finished"
-        async with timeout(10):
+        async with timeout(TIMEOUT):
             async for _ in Q:
                 pass
     except TimeoutError:
@@ -156,7 +159,7 @@ async def test_3_multiple_producers(test_interablequeue_int: IterableQueue[int])
         w.cancel()
 
 
-@pytest.mark.timeout(10)
+@pytest.mark.timeout(TIMEOUT)
 @pytest.mark.asyncio
 async def test_4_multiple_producers_consumers(
     test_interablequeue_int: IterableQueue[int],
@@ -166,26 +169,26 @@ async def test_4_multiple_producers_consumers(
     consumers: list[Task] = list()
 
     for _ in range(THREADS):
-        producers.append(create_task(_producer_int(Q, N, finish=False, wait=0.05)))
-        consumers.append(create_task(_consumer_int(Q, 2 * N, wait=0.06)))
+        producers.append(create_task(_producer_int(Q, N, finish=False, wait=0.01)))
+        consumers.append(create_task(_consumer_int(Q, 2 * N, wait=0.01)))
     try:
-        async with timeout(10):
+        async with timeout(TIMEOUT):
             await gather(*producers)
             await Q.finish_producer(all=True)
             await Q.join()
             assert not Q.has_wip, "Queue should not have any items WIP"
     except TimeoutError:
         assert False, "IterableQueue.join() took too long"
-    assert (
-        Q.count == THREADS * N
-    ), f"count returned wrong value {Q.count}, should be {THREADS*N}"
+    assert Q.count == THREADS * N, (
+        f"count returned wrong value {Q.count}, should be {THREADS * N}"
+    )
     assert Q.qsize() == 0, "queue size is > 0 even it should be empty"
     assert Q.empty(), "queue not empty"
     for p in consumers:
         p.cancel()
 
 
-@pytest.mark.timeout(10)
+@pytest.mark.timeout(TIMEOUT)
 @pytest.mark.asyncio
 async def test_5_empty_join(test_interablequeue_int: IterableQueue[int]):
     """Test for await join when an empty queue is finished"""
@@ -194,21 +197,20 @@ async def test_5_empty_join(test_interablequeue_int: IterableQueue[int]):
     assert not Q.is_done, "is_done returned True even queue is not finished"
     consumer: Task = create_task(_consumer_int(Q))
     try:
-        
         async with timeout(3):
             await Q.join()
-        assert (
-            Q.empty()
-        ), "Queue is done after 3 secs and the join() should finish before timeout(5)"
+        assert Q.empty(), (
+            "Queue is done after 3 secs and the join() should finish before timeout(5)"
+        )
     except TimeoutError:
         assert False, "await IterableQueue.join() failed with an empty queue finished"
     await sleep(0.1)
 
     try:
         consumer.cancel()
-        assert (
-            not consumer.cancelled()
-        ), "consumer task was cancelled and did not complete even it should have"
+        assert not consumer.cancelled(), (
+            "consumer task was cancelled and did not complete even it should have"
+        )
     except Exception as err:
         assert False, f"Unknown Exception caught: {err}"
     assert producer.done(), "producer has not finished"
@@ -240,7 +242,7 @@ async def test_6_finish_full_queue(test_interablequeue_int: IterableQueue[int]):
     assert finisher.done(), "finisher has not finished"
 
 
-@pytest.mark.timeout(10)
+@pytest.mark.timeout(TIMEOUT)
 @pytest.mark.asyncio
 async def test_7_aiter(test_interablequeue_int: IterableQueue[int]):
     """Test for await join when an empty queue is finished"""
@@ -259,7 +261,7 @@ async def test_7_aiter(test_interablequeue_int: IterableQueue[int]):
         assert False, "await IterableQueue.join() failed with an empty queue finished"
 
 
-@pytest.mark.timeout(10)
+@pytest.mark.timeout(TIMEOUT)
 @pytest.mark.asyncio
 async def test_8_aiter_1_item(test_interablequeue_int: IterableQueue[int]):
     """Test for await join when an empty queue is finished"""
@@ -274,8 +276,8 @@ async def test_8_aiter_1_item(test_interablequeue_int: IterableQueue[int]):
             count += 1
             assert i >= 0, "Did not receive an int"
         assert count == 1, f"Did not receive correct number of elements {count} != 1"
-        assert (
-            True
-        ), "Queue is done after 3 secs and the join() should finish before timeout(5)"
+        assert True, (
+            "Queue is done after 3 secs and the join() should finish before timeout(5)"
+        )
     except TimeoutError:
         assert False, "await IterableQueue.join() failed with an empty queue finished"
