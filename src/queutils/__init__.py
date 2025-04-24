@@ -6,6 +6,10 @@ from .eventcounterqueue import (
     QCounter as QCounter,
     EventCounterQueue as EventCounterQueue,
 )
+from .awrap import (
+    awrap as awrap,
+    abatch as abatch,
+)
 
 __all__ = [
     "asyncqueue",
@@ -13,4 +17,5 @@ __all__ = [
     "eventcounterqueue",
     "filequeue",
     "iterablequeue",
+    "awrap",
 ]
