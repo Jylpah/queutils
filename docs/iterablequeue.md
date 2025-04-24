@@ -9,7 +9,7 @@ iterated in `async for` loop. The great benefit of `IterableQueue` is that it te
 - `AsyncIterable` support: `async for item in queue:`
 - Automatic termination of the consumers with `QueueDone` exception when the queue has been emptied 
 - Producers must be registered with `add_producer()` and they must notify the queue
-  with `finish()` once they have finished adding items 
+  with `finish_producer()` once they have finished adding items 
 - Countable interface to count number of items task_done() through `count` property
 
 ### Experimental
@@ -21,7 +21,7 @@ iterated in `async for` loop. The great benefit of `IterableQueue` is that it te
 
 ### Producers fill a queue
 
-A *Producer* is "process" that adds items to the queue. A producer needs to be registered to the queue with `add_producer()` coroutine. Once a producer has added all the items it intends to, it notifies the queue with `finish()`
+A *Producer* is "process" that adds items to the queue. A producer needs to be registered to the queue with `add_producer()` coroutine. Once a producer has added all the items it intends to, it notifies the queue with `finish_producer()`
 
 ```python
 from queutils.iterablequeue import IterableQueue
@@ -37,7 +37,7 @@ async def producer(
         await Q.put(i)
     
     # notify the queue that this producer does not add more
-    await Q.finish()
+    await Q.finish_producer()
     
     return None
 ```
@@ -88,7 +88,7 @@ async def producer(
             print(f"{since():.2f} producer {id}: awaiting to put {i} to queue")
             await Q.put(i)
             print(f"{since():.2f} producer {id}: put {i} to queue")
-        await Q.finish()
+        await Q.finish_producer()
     except QueueDone:
         print(f"ERROR: producer {id}, this should not happen")
     return None
