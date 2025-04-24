@@ -50,7 +50,7 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
     - AsyncIterable(): async for item in queue:
     - Automatic termination of the consumers when the queue has been emptied with QueueDone exception
     - Producers must be registered with add_producer() and they must notify the queue
-      with finish() once they have finished adding items
+      with finish_producer() once they have finished adding items
     - Countable interface to count number of items task_done() through 'count' property
 
     IterableQueue stages:
@@ -166,7 +166,7 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
         """
         Producer has finished adding items to the queue.
         Once the last producers has finished, the queue is_filled.
-        - all: finish() queue for all producers at once
+        - all: finish_producer() queue for all producers at once
 
         Return True if the last producer is 'finished'
         """
@@ -177,7 +177,7 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
             self._producers -= 1
 
             if self._producers < 0:
-                raise ValueError("Too many finish() calls")
+                raise ValueError("Too many finish_producer() calls")
             elif all or self._producers == 0:
                 self._filled.set()
                 self._producers = 0

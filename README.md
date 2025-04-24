@@ -27,11 +27,10 @@ an `asyncio.Queue` compatible interface to a (non-async) managed `multiprocessin
 [`IterableQueue`](docs/iterablequeue.md) is an `asyncio.Queue` subclass that is `AsyncIterable[T]` i.e. it can be 
 iterated in `async for` loop. `IterableQueue` terminates automatically when the queue has been filled and emptied. 
 
-The `IterableQueue` requires "producers" (functions adding items to the queue) to register themselves with `add_producer()` call and it 
-keeps count of registered producers which are "finished" adding items to the queue. Once all the registered 
-producers are "finished", the queue enters into "filled" state and no new items can be added. Once an 
-"filled" queue is emptied, the queue becomes "done" and all new `get()` calls to the queue will 
-`raise QueueDone` exception. 
+The `IterableQueue` requires "producers" (functions adding items to the queue) to register themselves with `add_producer()` call. It keeps count of registered producers. When a producer "finishes" adding items to the queue, 
+it needs to unregister itself with `finish_producer()` call. Once all the registered 
+producers are "finished", the queue enters into "filled" state and no new items can be added. Once a "filled" queue has been emptied, the queue becomes "done" and 
+all new `get()` calls to the queue will `raise QueueDone` exception. 
     
 ## Features
 
@@ -39,7 +38,7 @@ producers are "finished", the queue enters into "filled" state and no new items 
 - `AsyncIterable` support: `async for item in queue:`
 - Automatic termination of the consumers with `QueueDone` exception when the queue has been emptied 
 - Producers must be registered with `add_producer()` and they must notify the queue
-  with `finish()` once they have finished adding items 
+  with `finish_producer()` once they have finished adding items 
 - Countable interface to count number of items task_done() through `count` property
 
 # EventCounterQueue

@@ -232,7 +232,7 @@ async def test_6_finish_full_queue(test_interablequeue_int: IterableQueue[int]):
         )
         assert Q.is_done, "Queue is not done"
     except TimeoutError:
-        assert False, f"await IterableQueue.finish() failed. qsize={Q.qsize()}"
+        assert False, f"await IterableQueue.finish_producer() failed. qsize={Q.qsize()}"
     await sleep(0.1)
     assert Q.is_done, "Queue is not done"
     producer.cancel()

@@ -39,7 +39,7 @@ producers are "finished", the queue enters into "filled" state and no new items 
 - `AsyncIterable` support: `async for item in queue:`
 - Automatic termination of the consumers with `QueueDone` exception when the queue has been emptied 
 - Producers must be registered with `add_producer()` and they must notify the queue
-  with `finish()` once they have finished adding items 
+  with `finish_producer()` once they have finished adding items 
 - Countable interface to count number of items task_done() through `count` property
 
 # EventCounterQueue
