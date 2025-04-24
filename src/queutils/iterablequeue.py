@@ -200,14 +200,12 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
             if self._producers <= 0:
                 raise ValueError("No registered producers")
             await self._Q.put(item=item)
-        # self._empty.clear()
         return None
 
     def put_nowait(self, item: T) -> None:
         """
         Experimental asyncio.Queue.put_nowait() implementation
         """
-        # raise NotImplementedError
         if self.is_filled:
             raise QueueDone
         if self._producers <= 0:
@@ -215,7 +213,6 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
         if item is None:
             raise ValueError("Cannot add None to IterableQueue")
         self._Q.put_nowait(item=item)
-        # self._empty.clear()
         return None
 
     async def get(self) -> T:
@@ -229,7 +226,6 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
                 await self._Q.put(None)
                 raise QueueDone
         else:
-            # async with self._modify:
             self._wip += 1
             return item
 
@@ -279,7 +275,6 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
         """
         Async iterator for IterableQueue
         """
-        # async with self._modify:
         if self._wip > 0:  # do not mark task_done() at first call
             self.task_done()
         try:
