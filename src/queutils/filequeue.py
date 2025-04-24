@@ -29,8 +29,6 @@ from .iterablequeue import IterableQueue
 
 logger = logging.getLogger(__name__)
 error = logger.error
-message = logger.warning
-verbose = logger.info
 debug = logger.debug
 
 

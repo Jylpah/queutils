@@ -4,13 +4,6 @@ from deprecated import deprecated
 from .countable import Countable
 from .iterablequeue import IterableQueue, QueueDone
 from collections import defaultdict
-import logging
-
-logger = logging.getLogger()
-error = logger.error
-message = logger.warning
-verbose = logger.info
-debug = logger.debug
 
 ###########################################
 #
