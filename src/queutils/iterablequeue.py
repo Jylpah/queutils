@@ -57,12 +57,11 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
     want to sum the count of multiple IterableQueues
     """
 
-    def __init__(self, count_items: bool = True, **kwargs):
+    def __init__(self, **kwargs) -> None:
         # _Q is required instead of inheriting from Queue()
         # using super() since Queue is Optional[T], not [T]
         self._Q: Queue[Optional[T]] = Queue(**kwargs)
         self._producers: int = 0
-        self._count_items: bool = count_items
         self._count: int = 0
         self._wip: int = 0
 
@@ -138,10 +137,7 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
 
     @property
     def count(self) -> int:
-        if self._count_items:
-            return self._count
-        else:
-            return 0
+        return self._count
 
     async def add_producer(self, N: int = 1) -> int:
         """
