@@ -11,8 +11,6 @@ iterated in `async for` loop. The great benefit of `IterableQueue` is that it te
 - Producers must be registered with `add_producer()` and they must notify the queue
   with `finish()` once they have finished adding items 
 - Countable interface to count number of items task_done() through `count` property
-- Countable property can be disabled with count_items=False. This is useful when you
-    want to sum the count of multiple IterableQueues 
 
 ### Experimental
 
