@@ -140,7 +140,8 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
         """
         Add producer(s) to the queue
         """
-        assert N > 0, "N has to be positive"
+        if N <= 0:
+            raise ValueError("N has to be positive")
         async with self._modify:
             if self.is_filled:
                 raise QueueDone
