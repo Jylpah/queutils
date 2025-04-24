@@ -79,7 +79,7 @@ async def test_1_put_get_async(test_interablequeue_int: IterableQueue[int]):
         async with timeout(TIMEOUT / 2):
             await Q.join()
         await Q.get()
-        assert False, "Queue is done and put() should raise an exception"
+        assert False, "Queue is done and get() should raise an exception"
     except TimeoutError:
         assert False, "IterableQueue.join() took too long"
     except QueueDone:
