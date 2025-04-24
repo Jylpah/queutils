@@ -65,6 +65,7 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
         # _Q is required instead of inheriting from Queue()
         # using super() since Queue is Optional[T], not [T]
         self._Q: Queue[Optional[T]] = Queue(**kwargs)
+        self._maxsize: int = self._Q.maxsize  # Asyncio.Queue has _maxsize
         self._producers: int = 0
         self._count: int = 0
         self._wip: int = 0
