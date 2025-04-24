@@ -16,7 +16,7 @@ async def _producer_int(
             await Q.put(i)
     except QueueDone:
         raise ValueError("Queue is done even no one closed it")
-    await Q.finish()
+    await Q.finish_producer()
     return None
 
 

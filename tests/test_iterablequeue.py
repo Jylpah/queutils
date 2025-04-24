@@ -36,7 +36,7 @@ async def _producer_int(
     except QueueDone:
         pass
     if finish:
-        await Q.finish()
+        await Q.finish_producer()
     return None
 
 
@@ -86,13 +86,13 @@ async def test_1_put_get_async(test_interablequeue_int: IterableQueue[int]):
     consumer.cancel()
 
 
-@pytest.mark.timeout(10)
+@pytest.mark.timeout(TIMEOUT)
 @pytest.mark.asyncio
 async def test_2_put_get_nowait(test_interablequeue_int: IterableQueue[int]):
     """Test put_nowait() and get_nowait() methods"""
     Q = test_interablequeue_int
     producer: Task = create_task(_producer_int(Q, N))
-    await sleep(1)
+    await sleep(N / 500)
     # In theory this could fail without a real error
     # if QSIZE is huge and/or system is slow
     assert Q.qsize() == Q.maxsize, "Queue was supposed to be at maxsize"
@@ -105,23 +105,32 @@ async def test_2_put_get_nowait(test_interablequeue_int: IterableQueue[int]):
     except QueueFull:
         pass  # OK, Queue was supposed to be full
 
-    try:
-        while True:
-            _ = Q.get_nowait()
-            Q.task_done()
-            await sleep(0.01)
-    except QueueEmpty:
-        assert Q.qsize() == 0, "Queue size should be zero"
+    finisher = create_task(Q.finish_producer(all=True))
 
     try:
-        async with timeout(5):
-            await Q.finish()
+        while True:
+            try:
+                _ = Q.get_nowait()
+                Q.task_done()
+            except QueueEmpty:
+                assert Q.qsize() == 0, "Queue size should be zero"
+                await sleep(0.01)
+    except QueueDone:
+        pass
+
+    try:
+        async with timeout(3):
+            await Q.finish_producer()
             await Q.join()
     except TimeoutError:
         assert False, "Queue.join() took longer than it should"
-    assert Q.qsize() == 0, "queue size is > 0 even it should be empty"
+    assert Q.qsize() == 0, f"queue size is {Q.qsize()} > 0 even it should be empty"
     assert Q.empty(), "queue not empty()"
     producer.cancel()
+    finisher.cancel()
+    await sleep(0.1)
+    assert producer.done(), "producer has not finished"
+    assert finisher.done(), "finisher has not finished"
 
 
 @pytest.mark.timeout(10)
@@ -162,7 +171,7 @@ async def test_4_multiple_producers_consumers(
     try:
         async with timeout(10):
             await gather(*producers)
-            await Q.finish(all=True)
+            await Q.finish_producer(all=True)
             await Q.join()
             assert not Q.has_wip, "Queue should not have any items WIP"
     except TimeoutError:
@@ -205,25 +214,30 @@ async def test_5_empty_join(test_interablequeue_int: IterableQueue[int]):
     assert producer.done(), "producer has not finished"
 
 
-@pytest.mark.timeout(10)
+@pytest.mark.timeout(TIMEOUT)
 @pytest.mark.asyncio
 async def test_6_finish_full_queue(test_interablequeue_int: IterableQueue[int]):
     """Test for await join when an empty queue is finished"""
     Q = test_interablequeue_int
     producer: Task = create_task(_producer_int(Q, n=QSIZE * 2))
     try:
-        await sleep(0.5)
-        async with timeout(3):
-            await Q.finish(all=True, empty=True)
-        assert (
-            Q.empty()
-        ), f"Queue should be empty: qsize={Q._Q.qsize()}: {Q._Q.get_nowait()}, {Q._Q.get_nowait()}"
+        await sleep(1)
+        finisher: Task = create_task(Q.finish_producer(all=True))
+        async for _ in Q:
+            pass
+        assert Q.empty(), (
+            f"Queue should be empty: qsize={Q.qsize()}: {Q._Q.get_nowait()}, {Q._Q.get_nowait()}"
+        )
         assert Q.is_done, "Queue is not done"
     except TimeoutError:
-        assert False, "await IterableQueue.join() failed with an empty queue finished"
+        assert False, f"await IterableQueue.finish() failed. qsize={Q.qsize()}"
     await sleep(0.1)
     assert Q.is_done, "Queue is not done"
     producer.cancel()
+    finisher.cancel()
+    await sleep(0.1)
+    assert producer.done(), "producer has not finished"
+    assert finisher.done(), "finisher has not finished"
 
 
 @pytest.mark.timeout(10)

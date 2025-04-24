@@ -19,6 +19,7 @@ __status__ = "Production"
 
 from asyncio import Queue, QueueFull, QueueEmpty, Event, Lock
 from typing import AsyncIterable, TypeVar, Optional
+from deprecated import deprecated
 from .countable import Countable
 import logging
 
@@ -153,39 +154,35 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
             self._producers += N
         return self._producers
 
-    async def finish(self, all: bool = False, empty: bool = False) -> bool:
+    @deprecated(version="0.10.0", reason="Use finish_producer() instead for clarity")
+    async def finish(self, all: bool = False) -> bool:
+        """
+        Finish producer
+
+        Depreciated function, use finish_producer() instead
+        """
+        return await self.finish_producer(all=all)
+
+    async def finish_producer(self, all: bool = False) -> bool:
         """
         Producer has finished adding items to the queue.
         Once the last producers has finished, the queue is_filled.
         - all: finish() queue for all producers at once
         """
         async with self._modify:
-            if self._producers <= 0 or self.is_filled:
-                # raise ValueError("finish() called more than the is producers")
-                self._producers = 0
+            if self.is_filled:
                 return False
+
             self._producers -= 1
 
-            if all or self._producers <= 0:
+            if self._producers < 0:
+                raise ValueError("Too many finish() calls")
+            elif all or self._producers == 0:
                 self._filled.set()
                 self._producers = 0
 
         if self._producers == 0:
-            if empty:
-                try:
-                    while True:
-                        _ = self.get_nowait()
-                        self.task_done()
-                except (QueueDone, QueueEmpty):
-                    pass
-
             async with self._put_lock:
-                if empty:
-                    try:
-                        _ = self.get_nowait()
-                        self.task_done()
-                    except (QueueDone, QueueEmpty):
-                        pass
                 self.check_done()
                 await self._Q.put(None)
                 return True

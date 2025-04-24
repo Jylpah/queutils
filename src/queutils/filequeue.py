@@ -47,8 +47,8 @@ def str2path(filename: str | Path, suffix: str | None = None) -> Path:
 
 class FileQueue(IterableQueue[Path]):
     """
-    Class to create a IterableQueue(asyncio.Queue) of filenames based on 
-    given directories and files as arguments. 
+    Class to create a IterableQueue(asyncio.Queue) of filenames based on
+    given directories and files as arguments.
     Supports include/exclude filters based on filenames.
     """
 
@@ -58,21 +58,21 @@ class FileQueue(IterableQueue[Path]):
         filter: str = "*",
         exclude: bool = False,
         case_sensitive: bool = True,
-        follow_symlinks: bool = False, 
+        follow_symlinks: bool = False,
         **kwargs,
     ):
         assert base is None or isinstance(base, Path), "base has to be Path or None"
         assert isinstance(filter, str), "filter has to be string"
         assert isinstance(case_sensitive, bool), "case_sensitive has to be bool"
         assert isinstance(follow_symlinks, bool), "follow_symlinks has to be bool"
-        
+
         # debug(f"maxsize={str(maxsize)}, filter='{filter}'")
         super().__init__(count_items=True, **kwargs)
         self._base: Optional[Path] = base
         # self._done: bool = False
         self._case_sensitive: bool = False
         self._exclude: bool = False
-        self._follow_symlinks : bool = follow_symlinks
+        self._follow_symlinks: bool = follow_symlinks
         self.set_filter(filter=filter, exclude=exclude, case_sensitive=case_sensitive)
 
     def set_filter(
@@ -119,8 +119,7 @@ class FileQueue(IterableQueue[Path]):
                     await self.put(path)
         except Exception as err:
             error(f"{err}")
-        return await self.finish()
-
+        return await self.finish_producer()
 
     async def put(self, path: Path) -> None:
         """Recursive function to build process queue. Sanitize filename"""
