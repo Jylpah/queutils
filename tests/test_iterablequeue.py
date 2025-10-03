@@ -1,5 +1,5 @@
 import pytest  # type: ignore
-from asyncio.queues import QueueEmpty, QueueFull
+from asyncio.queues import QueueEmpty, QueueFull, Queue
 from asyncio import (
     Task,
     create_task,
@@ -9,6 +9,7 @@ from asyncio import (
     TimeoutError,
     CancelledError,
 )
+from typing import Optional
 from random import random
 
 from queutils import IterableQueue, QueueDone
@@ -281,3 +282,17 @@ async def test_8_aiter_1_item(test_interablequeue_int: IterableQueue[int]):
         )
     except TimeoutError:
         assert False, "await IterableQueue.join() failed with an empty queue finished"
+
+
+@pytest.mark.asyncio
+async def test_9_from_queue():
+    """Test from_queue class method"""
+    Q = Queue[Optional[int]](maxsize=QSIZE)
+    iq = IterableQueue.from_queue(Q)
+    assert iq.maxsize == Q.maxsize, "maxsize does not match"
+    assert iq.qsize() == Q.qsize(), "qsize does not match"
+    assert iq.empty() == Q.empty(), "empty() does not match"
+    assert iq.full() == Q.full(), "full() does not match"
+
+    with pytest.raises(TypeError):
+        IterableQueue.from_queue("not a queue")
