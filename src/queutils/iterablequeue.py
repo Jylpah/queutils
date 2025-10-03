@@ -82,6 +82,17 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
 
         self._empty.clear()  # this will be tested only after queue is filled
 
+    @classmethod
+    def from_queue(cls, Q: Queue[Optional[T]]) -> "IterableQueue[T]":
+        """
+        Create IterableQueue from existing asyncio.Queue
+        """
+        if not isinstance(Q, Queue):
+            raise TypeError("Q must be an instance of asyncio.Queue")
+        iq: IterableQueue[T] = cls(maxsize=Q.maxsize)
+        iq._Q = Q
+        return iq
+
     @property
     def is_filled(self) -> bool:
         """ "
