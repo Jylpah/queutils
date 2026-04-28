@@ -19,8 +19,7 @@ __status__ = "Production"
 
 import logging
 
-# from asyncio import Queue
-import aioconsole  # type: ignore
+import fileinput
 from fnmatch import fnmatch, fnmatchcase
 from pathlib import Path
 from typing import Optional, Sequence
@@ -102,9 +101,8 @@ class FileQueue(IterableQueue[Path]):
         file: str | Path
         try:
             if isinstance(files[0], str) and files[0] == "-":
-                stdin, _ = await aioconsole.get_standard_streams()
-                while (line := await stdin.readline()) is not None:
-                    path = Path(line.decode("utf-8").removesuffix("\n"))
+                for line in fileinput.input(encoding="utf-8"):
+                    path = Path(line.removesuffix("\n"))
                     if self._base is not None:
                         path = self._base / path
                     await self.put(path)
