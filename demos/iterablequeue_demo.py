@@ -1,6 +1,7 @@
 from asyncio import sleep, run, TaskGroup
 from random import random
-from queutils import IterableQueue, QueueDone
+from queutils import IterableQueue
+from asyncio.queues import QueueShutDown
 from time import time
 
 start: float = time()
@@ -22,7 +23,7 @@ async def producer(Q: IterableQueue[int], N: int, id: int) -> None:
             await Q.put(i)
             print(f"{since():.2f} producer {id}: put {i} to queue")
         await Q.finish_producer()
-    except QueueDone:
+    except QueueShutDown:
         print(f"ERROR: producer {id}, this should not happen")
     return None
 

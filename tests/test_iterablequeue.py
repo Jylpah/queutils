@@ -1,5 +1,5 @@
 import pytest  # type: ignore
-from asyncio.queues import QueueEmpty, QueueFull, Queue
+from asyncio.queues import QueueEmpty, QueueFull, QueueShutDown, Queue
 from asyncio import (
     Task,
     create_task,
@@ -12,7 +12,7 @@ from asyncio import (
 from typing import Optional
 from random import random
 
-from queutils import IterableQueue, QueueDone
+from queutils import IterableQueue
 
 QSIZE: int = 37
 N: int = 500  # N >> QSIZE
@@ -35,7 +35,7 @@ async def _producer_int(
         for i in range(n):
             await sleep(wait * random())
             await Q.put(i)
-    except QueueDone:
+    except QueueShutDown:
         pass
     if finish:
         await Q.finish_producer()
@@ -49,7 +49,7 @@ async def _consumer_int(Q: IterableQueue[int], n: int = -1, wait: float = 0) -> 
             await sleep(wait * random())
             Q.task_done()
             n -= 1
-    except QueueDone:
+    except QueueShutDown:
         pass
     except CancelledError:
         raise
@@ -72,7 +72,7 @@ async def test_1_put_get_async(test_interablequeue_int: IterableQueue[int]):
     try:
         await Q.put(1)
         assert False, "Queue is filled and put() should raise an exception"
-    except QueueDone:
+    except QueueShutDown:
         pass  # Queue is done and put() should raise an exception
     assert not Q.is_done, "is_done returned True even queue is not finished"
     consumer: Task = create_task(_consumer_int(Q))
@@ -83,7 +83,7 @@ async def test_1_put_get_async(test_interablequeue_int: IterableQueue[int]):
         assert False, "Queue is done and get() should raise an exception"
     except TimeoutError:
         assert False, "IterableQueue.join() took too long"
-    except QueueDone:
+    except QueueShutDown:
         pass  # should be raised
     assert Q.qsize() == 0, "queue not empty"
     assert Q.empty(), "queue not empty"
@@ -119,7 +119,7 @@ async def test_2_put_get_nowait(test_interablequeue_int: IterableQueue[int]):
             except QueueEmpty:
                 assert Q.qsize() == 0, "Queue size should be zero"
                 await sleep(0.01)
-    except QueueDone:
+    except QueueShutDown:
         pass
 
     try:
@@ -151,7 +151,7 @@ async def test_3_multiple_producers(test_interablequeue_int: IterableQueue[int])
                 pass
     except TimeoutError:
         assert False, "IterableQueue.join() took too long"
-    except QueueDone:
+    except QueueShutDown:
         pass  # Queue is done
 
     assert Q.qsize() == 0, f"queue size is {Q.qsize()} even it should be empty"

@@ -3,8 +3,9 @@ from asyncio import (
     Task,
     create_task,
 )
+from asyncio.queues import QueueShutDown
 
-from queutils import IterableQueue, QueueDone, abatch, awrap
+from queutils import IterableQueue, abatch, awrap
 
 
 async def _producer_int(
@@ -14,7 +15,7 @@ async def _producer_int(
     try:
         for i in range(n):
             await Q.put(i)
-    except QueueDone:
+    except QueueShutDown:
         raise ValueError("Queue is done even no one closed it")
     await Q.finish_producer()
     return None

@@ -1,8 +1,6 @@
-from asyncio import Queue
+from asyncio import Queue, QueueShutDown
 from typing import TypeVar
-from deprecated import deprecated
-from .countable import Countable
-from .iterablequeue import IterableQueue, QueueDone
+from .iterablequeue import IterableQueue
 from collections import defaultdict
 
 ###########################################
@@ -11,41 +9,6 @@ from collections import defaultdict
 #
 ###########################################
 T = TypeVar("T")
-
-
-@deprecated(version="0.9.1", reason="Use EventCounterQueue instead")
-class CounterQueue(Queue[T], Countable):
-    """
-    CounterQueue is a asyncio.Queue for counting items
-    """
-
-    _counter: int
-    _count_items: bool
-    _batch: int
-
-    def __init__(
-        self, *args, count_items: bool = True, batch: int = 1, **kwargs
-    ) -> None:
-        super().__init__(*args, **kwargs)
-        self._counter = 0
-        self._count_items = count_items
-        self._batch = batch
-
-    def task_done(self) -> None:
-        super().task_done()
-        if self._count_items:
-            self._counter += 1
-        return None
-
-    @property
-    def count(self) -> int:
-        """Return number of completed tasks"""
-        return self._counter * self._batch
-
-    @property
-    def count_items(self) -> bool:
-        """Whether or not count items"""
-        return self._count_items
 
 
 class EventCounterQueue(IterableQueue[tuple[str, int]]):
@@ -88,7 +51,7 @@ class EventCounterQueue(IterableQueue[tuple[str, int]]):
         try:
             while True:
                 await self.receive()
-        except QueueDone:
+        except QueueShutDown:
             pass
         return self.get_counts()
 

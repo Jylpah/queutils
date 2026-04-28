@@ -17,9 +17,8 @@ __email__ = "Jylpah@gmail.com"
 __status__ = "Production"
 
 
-from asyncio import Queue, QueueFull, Event, Lock
+from asyncio import Queue, QueueFull, QueueShutDown, Event, Lock
 from typing import AsyncIterable, TypeVar, Optional
-from deprecated import deprecated
 from .countable import Countable
 import logging
 
@@ -30,12 +29,12 @@ debug = logger.debug
 T = TypeVar("T")
 
 
-class QueueDone(Exception):
-    """
-    Exception to mark an IterableQueue as filled and emptied i.e. done
-    """
+# class QueueDone(Exception):
+#     """
+#     Exception to mark an IterableQueue as filled and emptied i.e. done
+#     """
 
-    pass
+#     pass
 
 
 class IterableQueue(Queue[T], AsyncIterable[T], Countable):
@@ -160,18 +159,10 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
             raise ValueError("N has to be positive")
         async with self._modify:
             if self.is_filled:
-                raise QueueDone
+                raise QueueShutDown
             self._producers += N
         return self._producers
 
-    @deprecated(version="0.10.0", reason="Use finish_producer() instead for clarity")
-    async def finish(self, all: bool = False) -> bool:
-        """
-        Finish producer
-
-        Depreciated function, use finish_producer() instead
-        """
-        return await self.finish_producer(all=all)
 
     async def finish_producer(self, all: bool = False) -> bool:
         """
@@ -208,7 +199,7 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
             raise ValueError("Cannot add None to IterableQueue")
         async with self._put_lock:
             if self.is_filled:  # should this be inside put_lock?
-                raise QueueDone
+                raise QueueShutDown
             if self._producers <= 0:
                 raise ValueError("No registered producers")
             await self._Q.put(item=item)
@@ -219,7 +210,7 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
         Experimental asyncio.Queue.put_nowait() implementation
         """
         if self.is_filled:
-            raise QueueDone
+            raise QueueShutDown
         if self._producers <= 0:
             raise ValueError("No registered producers")
         if item is None:
@@ -236,7 +227,7 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
             self._Q.task_done()
             async with self._put_lock:
                 await self._Q.put(None)
-                raise QueueDone
+                raise QueueShutDown
         else:
             self._wip += 1
             return item
@@ -255,7 +246,7 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
                 self._Q.put_nowait(None)
             except QueueFull:
                 pass
-            raise QueueDone
+            raise QueueShutDown
         else:
             self._wip += 1
             return item
@@ -291,5 +282,5 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
             self.task_done()
         try:
             return await self.get()
-        except QueueDone:
+        except QueueShutDown:
             raise StopAsyncIteration
