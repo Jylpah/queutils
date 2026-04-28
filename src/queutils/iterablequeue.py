@@ -17,8 +17,8 @@ __email__ = "Jylpah@gmail.com"
 __status__ = "Production"
 
 
-from asyncio import Queue, QueueFull, QueueShutDown, Event, Lock
-from typing import AsyncIterable, TypeVar, Optional
+from asyncio import Event, Queue, QueueShutDown
+from typing import AsyncIterable, TypeVar
 from .countable import Countable
 import logging
 
@@ -63,26 +63,25 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
     def __init__(self, **kwargs) -> None:
         # _Q is required instead of inheriting from Queue()
         # using super() since Queue is Optional[T], not [T]
-        self._Q: Queue[Optional[T]] = Queue(**kwargs)
-        self._maxsize: int = self._Q.maxsize  # Asyncio.Queue has _maxsize
+        self._Q: Queue[T] = Queue(**kwargs)
         self._producers: int = 0
         self._count: int = 0
-        self._wip: int = 0
+        self._first_get: bool = False
 
-        self._modify: Lock = Lock()
-        self._put_lock: Lock = Lock()
+        # self._modify: Lock = Lock()
+        # self._put_lock: Lock = Lock()
 
         # the last producer has finished
         self._filled: Event = Event()
         # the last producer has finished and the queue is empty
-        self._empty: Event = Event()
+        # self._empty: Event = Event()
         # the queue is done, all items have been marked with task_done()
-        self._done: Event = Event()
+        # self._done: Event = Event()
 
-        self._empty.clear()  # this will be tested only after queue is filled
+        # self._empty.clear()  # this will be tested only after queue is filled
 
     @classmethod
-    def from_queue(cls, Q: Queue[Optional[T]]) -> "IterableQueue[T]":
+    def from_queue(cls, Q: Queue[T]) -> "IterableQueue[T]":
         """
         Create IterableQueue from existing asyncio.Queue
         """
@@ -100,16 +99,17 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
         """
         return self._filled.is_set()
 
-    @property
-    def is_done(self) -> bool:
-        """
-        Has the queue been filled, emptied and all the items have been marked with task_done()
-        """
-        return self.is_filled and self.empty() and not self.has_wip
+    # @property
+    # def is_done(self) -> bool:
+    #     """
+    #     Has the queue been filled, emptied and all the items have been marked with task_done()
+    #     """
+    #     return self.is_filled and self.empty() and not self.has_wip
 
     @property
     def maxsize(self) -> int:
         return self._Q.maxsize
+    
 
     def full(self) -> bool:
         """
@@ -121,31 +121,28 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
         """
         Queue has no items except None as a sentinel
         """
-        return self._empty.is_set() or self.qsize() == 0
+        return self._Q.empty() or self.qsize() == 0
 
     def qsize(self) -> int:
         """
         asyncio.Queue.qsize()
         """
-        if self.is_filled:
-            return self._Q.qsize() - 1
-        else:
-            return self._Q.qsize()
+        return self._Q.qsize()
 
-    @property
-    def wip(self) -> int:
-        """
-        Number of items in progress i.e. items that have been
-        read from the queue, but not marked with task_done()
-        """
-        return self._wip
+    # @property
+    # def wip(self) -> int:
+    #     """
+    #     Number of items in progress i.e. items that have been
+    #     read from the queue, but not marked with task_done()
+    #     """
+    #     return self._wip
 
-    @property
-    def has_wip(self) -> bool:
-        """
-        True if queue has items in progress
-        """
-        return self._wip > 0
+    # @property
+    # def has_wip(self) -> bool:
+    #     """
+    #     True if queue has items in progress
+    #     """
+    #     return self._wip > 0
 
     @property
     def count(self) -> int:
@@ -157,12 +154,16 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
         """
         if N <= 0:
             raise ValueError("N has to be positive")
-        async with self._modify:
-            if self.is_filled:
-                raise QueueShutDown
-            self._producers += N
+        # async with self._modify:
+        if self.is_filled:
+            raise QueueShutDown
+        self._producers += N
         return self._producers
 
+    def shutdown(self, immediate: bool = False) -> None:
+        self._filled.set()
+        self._producers = 0
+        return self._Q.shutdown(immediate)
 
     async def finish_producer(self, all: bool = False) -> bool:
         """
@@ -172,38 +173,44 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
 
         Return True if the last producer is 'finished'
         """
-        async with self._modify:
-            if self.is_filled:
-                return True
+        if self.is_filled:
+            return True
 
+        if all:
+            self._producers = 0
+        else:
             self._producers -= 1
 
-            if self._producers < 0:
-                raise ValueError("Too many finish_producer() calls")
-            elif all or self._producers == 0:
-                self._filled.set()
-                self._producers = 0
-
-        if self._producers == 0:
-            async with self._put_lock:
-                if self._Q.qsize() == 0:
-                    self._empty.set()
-                    if not self.has_wip:
-                        self._done.set()
-                await self._Q.put(None)
-                return True
+        if self._producers < 0:
+            raise ValueError("Too many finish_producer() calls")
+        elif self._producers == 0:
+            self.shutdown()
+            return True
+        # if self._producers == 0:
+        #     async with self._put_lock:
+        #         if self._Q.qsize() == 0:
+        #             self._empty.set()
+        #             if not self.has_wip:
+        #                 self._done.set()
+        #         await self._Q.put(None)
+        #         return True
         return False
 
     async def put(self, item: T) -> None:
-        if item is None:
-            raise ValueError("Cannot add None to IterableQueue")
-        async with self._put_lock:
-            if self.is_filled:  # should this be inside put_lock?
-                raise QueueShutDown
-            if self._producers <= 0:
-                raise ValueError("No registered producers")
-            await self._Q.put(item=item)
-        return None
+        """
+        Add an item to the queue. 
+        Requires at least one producer to be registered with add_producer() 
+        and not finished with finish_producer()
+        """
+        # async with self._put_lock:
+        #     if self.is_filled:  # should this be inside put_lock?
+        #         raise QueueShutDown
+        if self.is_filled:
+            raise QueueShutDown
+        if self._producers <= 0:
+            raise ValueError("No registered producers")
+        return await self._Q.put(item=item)
+        
 
     def put_nowait(self, item: T) -> None:
         """
@@ -213,60 +220,56 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
             raise QueueShutDown
         if self._producers <= 0:
             raise ValueError("No registered producers")
-        if item is None:
-            raise ValueError("Cannot add None to IterableQueue")
-        self._Q.put_nowait(item=item)
-        return None
-
+        # if item is None:
+        #     raise ValueError("Cannot add None to IterableQueue")
+        return self._Q.put_nowait(item=item)
+        
     async def get(self) -> T:
-        item = await self._Q.get()
-        if item is None:
-            self._empty.set()
-            if not self.has_wip:
-                self._done.set()
-            self._Q.task_done()
-            async with self._put_lock:
-                await self._Q.put(None)
-                raise QueueShutDown
-        else:
-            self._wip += 1
-            return item
-
+        item: T = await self._Q.get()
+        self._first_get = True
+        return item
+    
     def get_nowait(self) -> T:
         """
         Experimental asyncio.Queue.get_nowait() implementation
         """
-        item: T | None = self._Q.get_nowait()
-        if item is None:
-            self._empty.set()
-            if not self.has_wip:
-                self._done.set()
-            self._Q.task_done()
-            try:
-                self._Q.put_nowait(None)
-            except QueueFull:
-                pass
-            raise QueueShutDown
-        else:
-            self._wip += 1
-            return item
+        item: T = self._Q.get_nowait()
+        self._first_get = True
+        return item
+    
+        # item: T | None = self._Q.get_nowait()
+        # if item is None:
+        #     self._empty.set()
+        #     if not self.has_wip:
+        #         self._done.set()
+        #     self._Q.task_done()
+        #     try:
+        #         self._Q.put_nowait(None)
+        #     except QueueFull:
+        #         pass
+        #     raise QueueShutDown
+        # else:
+        #     self._wip += 1
+        #     return item
 
     def task_done(self) -> None:
         self._Q.task_done()
         self._count += 1
-        self._wip -= 1
-        if self._wip < 0:
-            raise ValueError("task_done() called more than tasks open")
-        if self.is_filled and self._empty.is_set() and not self.has_wip:
-            self._done.set()
+        return None
+        # self._wip -= 1
+        # if self._wip < 0:
+        #     raise ValueError("task_done() called more than tasks open")
+        # if self.is_filled and self._empty.is_set() and not self.has_wip:
+        #     self._done.set()
 
     async def join(self) -> None:
-        debug("Waiting queue to be filled")
-        await self._filled.wait()
-        debug("Queue filled, waiting when queue is done")
-        await self._done.wait()
-        debug("queue is done")
-        return None
+        return await self._Q.join()
+        # debug("Waiting queue to be filled")
+        # await self._filled.wait()
+        # debug("Queue filled, waiting when queue is done")
+        # await self._done.wait()
+        # debug("queue is done")
+        # return None
 
     def __aiter__(self):
         """
@@ -278,7 +281,7 @@ class IterableQueue(Queue[T], AsyncIterable[T], Countable):
         """
         Async iterator for IterableQueue
         """
-        if self._wip > 0:  # do not mark task_done() at first call
+        if self._first_get:  # do not mark task_done() at first call
             self.task_done()
         try:
             return await self.get()
