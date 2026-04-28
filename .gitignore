@@ -132,6 +132,7 @@ dmypy.json
 # VS Code
 *.code-workspace
 .vscode/
+.codex
 
 # Tmp
 tmp/
