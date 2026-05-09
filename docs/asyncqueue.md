@@ -19,9 +19,8 @@ import queue
 from queutils import AsyncQueue
 
 syncQ: queue.Queue[int] = queue.Queue(maxsize=5)
+# asyncQ can be used as any asyncio.Queue
 asyncQ: AsyncQueue[int] = AsyncQueue(syncQ)
-
-# asyncQ can not be used as any asyncio.Queue
 ```
 
 ### Full example
