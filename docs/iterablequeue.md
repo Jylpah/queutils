@@ -1,7 +1,7 @@
 # IterableQueue
 
 `IterableQueue` is an `asyncio.Queue` subclass that is `AsyncIterable[T]` i.e. it can be 
-iterated in `async for` loop. The great benefit of `IterableQueue` is that it terminates automatically when the queue has been filled and emptied. This simplifies more complex queue-based processing flows.
+iterated in `async for` loop. The benefit of `IterableQueue` is that it terminates automatically when the queue has been filled and emptied. This simplifies more complex queue-based processing flows.
     
 ## Features
 
@@ -63,7 +63,7 @@ async def consumer(Q: IterableQueue[int]):
 A `IterableQueue` example with multiple producers and consumers. This works with Python 3.11 and higher since the use of `asyncio.TaskGroup`.  
 
 ```python
-## Python 3.11+ required 
+## Python 3.13+ required 
 
 from asyncio import sleep, run, TaskGroup
 from random import random

@@ -2,13 +2,14 @@
 
 # Queutils
 
-Queutils *[Queue Utils]* is a package of handy Python queue classes:
+Queutils *[Queue Utils]* is a package of Python queue subclasses. 
 
 - **[AsyncQueue](docs/asyncqueue.md)** - An `async` wrapper for non-async `queue.Queue`
 - **[IterableQueue](docs/iterablequeue.md)** - An `AsyncIterable` queue that terminates when finished
 - **EventCounterQueue** - An `IterableQueue` for counting events in `async` threads
 - **[FileQueue](docs/filequeue.md)** - Builds an `IterableQueue[pathlib.Path]` of filenames from files/dirs given as input
 
+version 1.x -> requires Python 3.13 or later
 
 # AsyncQueue
 
