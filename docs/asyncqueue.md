@@ -1,7 +1,7 @@
 # AsyncQueue
 
 `AsyncQueue` is a async wrapper for non-async `queue.Queue`. It can be used to create 
-an `asyncio.Queue` compatible out of a (non-async) `multiprocessing.Queue`. This is handy to have `async` code running in `multiprocessing` processes and yet be able to communicate with the parent via (non-async) managed `multiprocessing.Queue` queue. 
+an `asyncio.Queue` compatible out of a (non-async) `multiprocessing.Queue`. This allows using `async.Queue` interface in code running in `multiprocessing` processes and yet be able to communicate with the parent process via a managed (non-async) `multiprocessing.Queue` queue. 
 
 
 ## Features 
