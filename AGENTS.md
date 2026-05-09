@@ -36,3 +36,21 @@ Format Python code:
 ```bash
 uv run ruff format .
 ```
+
+## Allowed commands
+
+These commands are allowed
+
+```
+uv run ruff [...]
+```
+
+```
+uv run pytest
+```
+
+```
+uv run mypy src tests demos
+```
+
+
